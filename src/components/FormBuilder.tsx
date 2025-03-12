@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 
+type FormElement = {
+    id: number;
+    type: "fullName" | "email" | "phone";
+  };
+
 const FormBuilder = () => {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
-    const [formElements, setFormElements] = useState<any[]>([]);
+    const [formElements, setFormElements] = useState<FormElement[]>([]);
     const [isThemeSidebarExpanded, setIsThemeSidebarExpanded] = useState(false);
     const [showThemes, setShowThemes] = useState(false);
     const [theme, setTheme] = useState("theme1");
@@ -20,7 +25,7 @@ const FormBuilder = () => {
         e.preventDefault();
         const elementType = e.dataTransfer.getData("elementType");
 
-        const newElement = { type: elementType, id: Date.now() };
+        const newElement = { type: elementType as "fullName" | "email" | "phone", id: Date.now() };
 
         setFormElements([...formElements, newElement]);
     };
