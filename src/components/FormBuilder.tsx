@@ -12,6 +12,7 @@ const FormBuilder = () => {
     const [showThemes, setShowThemes] = useState(false);
     const [theme, setTheme] = useState("theme1");
     const [isPreviewMode, setIsPreviewMode] = useState(false);
+    const [formErrors, setFormErrors] = useState<{ [key: number]: string }>({});
 
     const handleAddElementClick = () => {
         setIsSidebarExpanded(!isSidebarExpanded);
@@ -36,6 +37,11 @@ const FormBuilder = () => {
 
     const handleRemoveElement = (id: number) => {
         setFormElements(formElements.filter((el) => el.id !== id));
+        setFormErrors((prev) => {
+            const newErrors = { ...prev };
+            delete newErrors[id];
+            return newErrors;
+        });
     };
 
     const handleThemeButtonClick = () => {
@@ -61,6 +67,37 @@ const FormBuilder = () => {
         theme1: "bg-blue-500",
         theme2: "bg-green-500",
         theme3: "bg-yellow-500",
+    };
+
+    const validateField = (id: number, type: string, value: string) => {
+        let error = "";
+
+        if (!value.trim()) {
+            error = `${type.replace(/([A-Z])/g, " $1")} is required`;
+        } else {
+            switch (type) {
+                case "firstName":
+                case "lastName":
+                    if (!/^[A-Za-z]+$/.test(value)) {
+                        error = "Only letters are allowed";
+                    }
+                    break;
+                case "email":
+                    if (!/^\S+@\S+\.\S+$/.test(value)) {
+                        error = "Invalid email format";
+                    }
+                    break;
+                case "phone":
+                    if (!/^\d{10}$/.test(value)) {
+                        error = "Phone must be 10 digits";
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        setFormErrors((prev) => ({ ...prev, [id]: error }));
     };
 
     return (
@@ -139,39 +176,28 @@ const FormBuilder = () => {
                                     <>
                                         <label className="block text-left font-bold">Name</label>
                                         <div className="flex gap-2">
-                                            <input
-                                                type="text"
-                                                placeholder="First Name"
-                                                className="border p-2 rounded w-1/2"
-                                            />
-                                            <input
-                                                type="text"
-                                                placeholder="Last Name"
-                                                className="border p-2 rounded w-1/2"
-                                            />
+                                        <input type="text" placeholder="First Name" className="border p-2 rounded w-1/2" 
+                                                onBlur={(e) => validateField(element.id, "firstName", e.target.value)} />
+                                            <input type="text" placeholder="Last Name" className="border p-2 rounded w-1/2"
+                                                onBlur={(e) => validateField(element.id, "lastName", e.target.value)} />
                                         </div>
                                     </>
                                 )}
                                 {element.type === "email" && (
                                     <>
                                         <label className="block text-left font-bold">Email</label>
-                                        <input
-                                            type="email"
-                                            placeholder="Enter your email"
-                                            className="border p-2 rounded w-full"
-                                        />
+                                        <input type="email" placeholder="Enter your email" className="border p-2 rounded w-full"
+                                            onBlur={(e) => validateField(element.id, "email", e.target.value)} />
                                     </>
                                 )}
                                 {element.type === "phone" && (
                                     <>
                                         <label className="block text-left font-bold">Phone</label>
-                                        <input
-                                            type="tel"
-                                            placeholder="Enter your phone number"
-                                            className="border p-2 rounded w-full"
-                                        />
+                                        <input type="tel" placeholder="Enter your phone number" className="border p-2 rounded w-full"
+                                            onBlur={(e) => validateField(element.id, "phone", e.target.value)} />
                                     </>
                                 )}
+                                <p className="text-red-500">{formErrors[element.id]}</p>
 
                                 {/* Remove Button */}
                                 {!isPreviewMode && (
